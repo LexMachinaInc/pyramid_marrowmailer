@@ -6,9 +6,6 @@ from pyramid.settings import asbool
 from zope.interface import Interface
 
 
-__version__ = '0.4.0'
-
-
 class IMarrowMailer(Interface):
     pass
 

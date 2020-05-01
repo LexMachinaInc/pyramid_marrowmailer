@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from os.path import join
-import re
 
 from setuptools import setup
 from setuptools import find_packages
@@ -15,19 +13,9 @@ def read(*rnames):
                 encoding='utf-8').read()
 
 
-def find_version(file_path):
-    """copied from pyelasticsearch"""
-    version_file = read(file_path)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError('Unable to find version string.')
-
-
 setup(
     name='pyramid_marrowmailer',
-    version=find_version(join('src', 'pyramid_marrowmailer', '__init__.py')),
+    version='0.4',
     description='Pyramid integration package for marrow.mailer,'
                 ' formerly known as TurboMail',
     long_description=read('README.rst') + read('HISTORY.rst'),
