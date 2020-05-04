@@ -88,7 +88,7 @@ def includeme(config):
     mailer.start()
 
     config.registry.registerUtility(mailer, IMarrowMailer)
-    config.set_request_property(get_mailer, "mailer", reify=True)
+    config.add_request_method(get_mailer, "mailer", reify=True)
 
     # shutdown mailer when process stops
     atexit.register(lambda: mailer.stop())

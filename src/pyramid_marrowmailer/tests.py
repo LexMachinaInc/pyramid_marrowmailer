@@ -1,4 +1,3 @@
-from __future__ import with_statement
 import unittest
 import logging
 
@@ -35,7 +34,7 @@ class BaseFunctionalTest(unittest.TestCase):
         testing.tearDown()
 
 
-class get_mailerTest(BaseFunctionalTest):
+class GetMailerTest(BaseFunctionalTest):
     def test_it(self):
         from pyramid_marrowmailer import get_mailer, TransactionMailer
         self.config.registry.settings['mail.transport.use'] = 'mock'
@@ -44,7 +43,7 @@ class get_mailerTest(BaseFunctionalTest):
         self.assertTrue(isinstance(mailer, TransactionMailer))
 
 
-class includemeTest(BaseFunctionalTest):
+class IncludemeTest(BaseFunctionalTest):
     def test_boolean_option(self):
         from pyramid_marrowmailer import get_mailer
         self.config.registry.settings['mail.transport.use'] = 'smtp'
@@ -69,7 +68,8 @@ class includemeTest(BaseFunctionalTest):
         self.assertEqual(get_mailer(self.request).config['transport.use'],
                          'smtp')
 
-class directTest(BaseFunctionalTest):
+
+class DirectTest(BaseFunctionalTest):
     def configure(self):
         settings = self.config.registry.settings
         settings['mail.mode'] = 'direct'
@@ -82,38 +82,44 @@ class directTest(BaseFunctionalTest):
         self.handler = ListHandler()
         self.handler.reset()
         root_logger.addHandler(self.handler)
+        root_logger.setLevel(logging.INFO)
 
     def test_send(self):
         self.configure()
         from pyramid_marrowmailer import get_mailer
         mailer = get_mailer(self.request)
 
-	message = mailer.new()
-	message.subject = "foobar"
-	message.to = "foobar@bar.com"
-	message.plain = "hi"
-	message.send()
-	self.assertEqual(self.handler.info, [])
+        message = mailer.new()
+        message.subject = "foobar"
+        message.to = "foobar@bar.com"
+        message.plain = "hi"
+        self.assertEqual(self.handler.info, [])
+        message.send()
 
-        self.assertTrue('DELIVER' in self.handler.info[1])
+        self.assertIn('DELIVER', self.handler.info[1])
 
-class transactionTest(BaseFunctionalTest):
+
+class TransactionTest(BaseFunctionalTest):
     def configure(self):
         settings = self.config.registry.settings
         settings['mail.transport.use'] = 'logging'
         settings['mail.message.author'] = 'foobar@foo.com'
         self.config.include('pyramid_marrowmailer')
 
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
         logging.basicConfig()
         root_logger = logging.getLogger()
         self.handler = ListHandler()
         self.handler.reset()
         root_logger.addHandler(self.handler)
+        root_logger.setLevel(logging.INFO)
 
     def test_send(self):
         self.configure()
-        from pyramid_marrowmailer import get_mailer
+        from pyramid_marrowmailer import get_mailer, TransactionMailer
         mailer = get_mailer(self.request)
+        self.assertIsInstance(mailer, TransactionMailer)
 
         import transaction
         with transaction.manager:
@@ -124,12 +130,13 @@ class transactionTest(BaseFunctionalTest):
             message.send()
             self.assertEqual(self.handler.info, [])
 
-        self.assertTrue('DELIVER' in self.handler.info[1])
+        self.assertIn('DELIVER', self.handler.info[1])
 
     def test_send_abort(self):
         self.configure()
-        from pyramid_marrowmailer import get_mailer
+        from pyramid_marrowmailer import get_mailer, TransactionMailer
         mailer = get_mailer(self.request)
+        self.assertIsInstance(mailer, TransactionMailer)
 
         import transaction
         try:

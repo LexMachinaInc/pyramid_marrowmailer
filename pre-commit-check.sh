@@ -8,11 +8,8 @@ function handle_exit {
 }
 
 echo '====== Running tests ========='
-bin/nosetests; handle_exit
-
-echo '====== Running PyFlakes ======'
-bin/python setup.py flakes; handle_exit
+nosetests src/pyramid_marrowmailer; handle_exit
 
 echo '====== Running pep8 =========='
-bin/pep8 src/pyramid_marrowmailer; handle_exit
-bin/pep8 *.py; handle_exit
+pycodestyle src/pyramid_marrowmailer; handle_exit
+pycodestyle ./*.py; handle_exit
